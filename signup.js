@@ -1,71 +1,148 @@
-const form = document.getElementById('form');
-const username = document.getElementById('username');
-const email = document.getElementById('email');
-const number = document.getElementById('number');
+class FormValidation{
+    formValues = {
+        username : "",
+        email : "",
+        phonenumber : "",
+        password : "",
+        confirmpassword : ""
+    }
+    errorValues = {
+        usernameErr : "",
+        emailErr : "",
+        phonenumberErr : "",
+        passwordErr : "",
+        confirmpasswordErr : ""
+    }
+    showErrorMsg(index,msg){
+        const form_group = document.getElementsByClassName('form-group')[index]
+        form_group.classList.add('error')
+        form_group.getElementsByTagName('span')[0].textContent = msg   
+    }
+    showSuccessMsg(index){
+        const form_group = document.getElementsByClassName('form-group')[index]
+        form_group.classList.remove('error')
+        form_group.classList.add('success')
+    }
+    getInputs(){
+        this.formValues.username = document.getElementById('username').value.trim()
+        this.formValues.email = document.getElementById('email').value.trim()
+        this.formValues.phonenumber = document.getElementById('phonenumber').value.trim()
+        this.formValues.password = document.getElementById('password').value.trim()
+        this.formValues.confirmpassword = document.getElementById('confirmpassword').value.trim()
+    }
+    validateUsername(){
+        if(this.formValues.username === ""){
+            this.errorValues.usernameErr = "* Please Enter Your Name"
+            this.showErrorMsg(0,this.errorValues.usernameErr)
+        } else if(this.formValues.username.length <= 4 ){
+            this.errorValues.usernameErr = "* Username must be atleast 5 Characters"
+            this.showErrorMsg(0,this.errorValues.usernameErr)
+        } else if(this.formValues.username.length > 14){
+            this.errorValues.usernameErr = "* Username should not exceeds 14 Characters"
+            this.showErrorMsg(0,this.errorValues.usernameErr)
+        } else {
+            this.errorValues.usernameErr = ""
+            this.showSuccessMsg(0)
+        }
+    }
+    validateEmail(){
+        //abc@gmail.co.in
+        const regExp = /^([a-zA-Z0-9-_\.]+)@([a-zA-Z0-9]+)\.([a-zA-Z]{2,10})(\.[a-zA-Z]{2,8})?$/
+        if(this.formValues.email === ""){
+            this.errorValues.emailErr = "* Please Enter Valid Email"
+            this.showErrorMsg(1,this.errorValues.emailErr)
+        } else if(!(regExp.test(this.formValues.email))){
+            this.errorValues.emailErr = "* Invalid Email"
+            this.showErrorMsg(1,this.errorValues.emailErr)
+        } else {
+            this.errorValues.emailErr = ""
+            this.showSuccessMsg(1)
+        }
+    }
+    validatePhonenumber(){
+       const phoneno = /^\d{10}$/
+       const phone1 = /^\+?([0-9]{2})\)?[-. ]?([0-9]{4})[-. ]?([0-9]{4})$/;
+       if(this.formValues.phonenumber === ""){
+        this.errorValues.phonenumberErr = "* Please Enter your Phone Number"
+        this.showErrorMsg(2,this.errorValues.phonenumberErr)
+       } else if(!(phone1.test(this.formValues.phonenumber))){
+        this.errorValues.phonenumberErr = "* invalid format"
+        this.showErrorMsg(2,this.errorValues.phonenumberErr)
+       }else if(phoneno.test(this.formValues.phonenumber)){
+        this.errorValues.phonenumberErr = ""
+        this.showSuccessMsg(2)
+      } else {
+        this.errorValues.phonenumberErr = "* Invalid Phone Number"
+        this.showErrorMsg(2,this.errorValues.phonenumberErr)
+    }
+       
+    }
 
+    validatePassword(){
+        const pass = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$@!%&*?])[A-Za-z\d#$@!%&*?]{8,30}$/
+        if(this.formValues.password === ""){
+            this.errorValues.passwordErr = "* Please Provide a Password"
+            this.showErrorMsg(3,this.errorValues.passwordErr)
+        } else if(this.formValues.password.length <= 7){
+            this.errorValues.passwordErr = "* Password must be atleast 8 Characters"
+            this.showErrorMsg(3,this.errorValues.passwordErr)
+        } else if(this.formValues.password.length > 20){
+            this.errorValues.passwordErr = "* Password should not exceeds 20 Characters"
+            this.showErrorMsg(3,this.errorValues.passwordErr)
+        }else if(!(pass.test(this.formValues.password))){
+            this.errorValues.passwordErr = "* should contain min 1 uppercase, 1 lowercase, 1 special character,1 number "
+            this.showErrorMsg(3,this.errorValues.passwordErr)
+         } else {
+            this.errorValues.passwordErr = ""
+            this.showSuccessMsg(3)
+        }
+    }
+    validateConfirmpassword(){
+        if(this.formValues.confirmpassword === ""){
+            this.errorValues.confirmpasswordErr = "* Invalid Confirm Password"
+            this.showErrorMsg(4,this.errorValues.confirmpasswordErr)
+        } else if(this.formValues.confirmpassword === this.formValues.password && this.errorValues.passwordErr === ""){
+            this.errorValues.confirmpasswordErr = ""
+            this.showSuccessMsg(4)
+        } else if(this.errorValues.passwordErr){
+            this.errorValues.confirmpasswordErr = "* An error occurred in Password Field"
+            this.showErrorMsg(4,this.errorValues.confirmpasswordErr)
+        } else {
+            this.errorValues.confirmpasswordErr = "* Password Must Match"
+            this.showErrorMsg(4,this.errorValues.confirmpasswordErr)
+        }
+    }
+    alertMessage(){
+        const {usernameErr , emailErr , phonenumberErr , passwordErr , confirmpasswordErr}= this.errorValues
+        if(usernameErr === "" && emailErr === "" && phonenumberErr === "" && passwordErr === "" && confirmpasswordErr === ""){
+            swal("Registration Successful","ThankYou , "+this.formValues.username,"success").then(() => {
+                console.log(this.formValues)
+                this.removeInputs()
+            })
+        } else {
+            swal("Give Valid Inputs","Click ok to Continue" ,"error")
+        }
+    }
 
-//  event listerners
+    removeInputs(){
+        const form_groups = document.getElementsByClassName('form-group')
+        Array.from(form_groups).forEach(element => {
+            element.getElementsByTagName('input')[0].value = ""
+            element.getElementsByTagName('span')[0].textContent = ""
+            element.classList.remove('success')
+        })
+    }
+} 
 
-form.addEventListener('submit', e => {
-    e.preventDefault();
+const ValidateUserInputs = new FormValidation()
 
-    validateInputs();
-
-    
-});
-
-const setError = (element, message) => {
-    const inputControl = element.parentElement;
-    const errorDisplay = inputControl.querySelector('.error');
-
-    errorDisplay.innerText = message;
-    inputControl.classList.add('error');
-    inputControl.classList.remove('success')
-}
-
-const setSuccess = element => {
-    const inputControl = element.parentElement;
-    const errorDisplay = inputControl.querySelector('.error');
-
-    errorDisplay.innerText = '';
-    inputControl.classList.add('success');
-    inputControl.classList.remove('error');
-};
-
-function isValidEmail(email) {
-    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
-}
-
-
-const validateInputs = () => {
-    const usernameValue = username.value.trim();
-    const emailValue = email.value.trim();
-   const numberValue = number.value.trim();
-
-   
-   if(usernameValue === '') {
-    setError(username, 'Username is required');
-} else {
-    setSuccess(username);
-}
-
-
-
-if(emailValue === '') {
-    setError(email, 'email is required');
-} else if (!isValidEmail(emailValue)) {
-    setError(email, 'provide a valid email address')
-} else {
-    setSuccess(email);
-}
-
-if(numberValue === '') {
-    setError(number, 'number is required');
-} else if (numberValue.length < 11) {
-    setError(number, 'number must be 10 digits')
-} else {
-    setSuccess(number);
-}  
-
-};
+document.getElementsByClassName('form')[0].addEventListener('submit' , event => {
+    event.preventDefault()
+    ValidateUserInputs.getInputs()
+    ValidateUserInputs.validateUsername()
+    ValidateUserInputs.validateEmail()
+    ValidateUserInputs.validatePhonenumber()
+    ValidateUserInputs.validatePassword()
+    ValidateUserInputs.validateConfirmpassword()
+    ValidateUserInputs.alertMessage()
+})
